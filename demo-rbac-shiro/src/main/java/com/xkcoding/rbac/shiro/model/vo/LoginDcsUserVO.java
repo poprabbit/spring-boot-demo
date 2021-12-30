@@ -15,55 +15,41 @@
  * limitations under the License.
  */
 
-package com.xkcoding.rbac.shiro.config.prop;
+package com.xkcoding.rbac.shiro.model.vo;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
+
+import java.util.Optional;
 
 /**
- * Aes Secret configuration.
+ * login dashboard return user info's vo.
  */
-@Component
-@ConfigurationProperties(prefix = "dcs.aes.secret")
-public class SecretProperties {
+@Data
+@NoArgsConstructor
+public class LoginDcsUserVO extends DcsUserVO {
 
-    private String key;
-
-    private String iv;
+    private static final long serialVersionUID = -411996250594776944L;
 
     /**
-     * Gets the value of key.
-     *
-     * @return the value of key
+     * token.
      */
-    public String getKey() {
-        return key;
-    }
+    private String token;
+
 
     /**
-     * Sets the key.
+     * build LoginDcsUserVO.
      *
-     * @param key key
+     * @param dcsUserVO {@linkplain DcsUserVO}
+     * @return {@linkplain LoginDcsUserVO}
      */
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    /**
-     * Gets the value of iv.
-     *
-     * @return the value of iv
-     */
-    public String getIv() {
-        return iv;
-    }
-
-    /**
-     * Sets the iv.
-     *
-     * @param iv iv
-     */
-    public void setIv(final String iv) {
-        this.iv = iv;
+    public static LoginDcsUserVO buildLoginDcsUserVO(final DcsUserVO dcsUserVO) {
+        return Optional.ofNullable(dcsUserVO)
+                .map(item -> {
+                    LoginDcsUserVO vo = new LoginDcsUserVO();
+                    BeanUtils.copyProperties(item, vo);
+                    return vo;
+                }).orElse(null);
     }
 }

@@ -15,40 +15,27 @@
  * limitations under the License.
  */
 
-package com.xkcoding.rbac.shiro.config.prop;
+package com.xkcoding.rbac.shiro.service.impl;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import com.xkcoding.rbac.shiro.model.vo.EnumVO;
+import com.xkcoding.rbac.shiro.service.EnumService;
+import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Shiro properties.
- */
-@Component("shiroProperties")
-@ConfigurationProperties(prefix = "dcs.shiro")
-public class ShiroProperties {
+@Service
+public class EnumServiceImpl implements EnumService {
 
     /**
-     * shiro's white list.
-     */
-    private List<String> whiteList;
-
-    /**
-     * Gets the value of whiteList.
+     * find list of enum.
      *
-     * @return the value of whiteList
+     * @return {@linkplain Map}
      */
-    public List<String> getWhiteList() {
-        return whiteList;
-    }
-
-    /**
-     * Sets the whiteList.
-     *
-     * @param whiteList whiteList
-     */
-    public void setWhiteList(final List<String> whiteList) {
-        this.whiteList = whiteList;
+    @SuppressWarnings({"checkstyle:WhitespaceAfter", "checkstyle:WhitespaceAround"})
+    @Override
+    public Map<String, List<EnumVO>> list() {
+        return Collections.EMPTY_MAP;
     }
 }

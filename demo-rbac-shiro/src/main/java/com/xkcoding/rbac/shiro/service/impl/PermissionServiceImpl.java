@@ -49,8 +49,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     @Autowired
     private ResourceService resourceService;
 
-
-
+    @Override
     public PermissionMenuVO getPermissionMenu(final String token) {
         UserInfo userInfo = JwtUtils.getUserInfo();
         if (!ObjectUtils.isEmpty(userInfo)) {

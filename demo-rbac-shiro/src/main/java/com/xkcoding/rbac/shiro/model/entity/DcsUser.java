@@ -30,7 +30,7 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Builder
-@TableName("dcs_user")
+@TableName("dashboard_user")
 public final class DcsUser extends BaseStrDO {
 
     private static final long serialVersionUID = 3464935043890680423L;

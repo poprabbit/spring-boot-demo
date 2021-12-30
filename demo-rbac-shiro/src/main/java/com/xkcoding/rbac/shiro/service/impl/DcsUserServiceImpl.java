@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xkcoding.rbac.shiro.common.AuthConstants;
 import com.xkcoding.rbac.shiro.config.prop.JwtProperties;
+import com.xkcoding.rbac.shiro.config.prop.JwtUtils;
 import com.xkcoding.rbac.shiro.config.prop.SecretProperties;
 import com.xkcoding.rbac.shiro.mapper.DcsUserMapper;
 import com.xkcoding.rbac.shiro.mapper.UserRoleMapper;
@@ -16,10 +17,12 @@ import com.xkcoding.rbac.shiro.model.page.PageParameter;
 import com.xkcoding.rbac.shiro.model.page.PageResultUtils;
 import com.xkcoding.rbac.shiro.model.query.DcsUserQuery;
 import com.xkcoding.rbac.shiro.model.vo.DcsUserVO;
+import com.xkcoding.rbac.shiro.model.vo.LoginDcsUserVO;
 import com.xkcoding.rbac.shiro.model.vo.RoleVO;
 import com.xkcoding.rbac.shiro.service.DcsUserService;
 import com.xkcoding.rbac.shiro.service.RoleService;
 import com.xkcoding.rbac.shiro.util.AesUtils;
+import com.xkcoding.rbac.shiro.util.UUIDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +64,9 @@ public class DcsUserServiceImpl extends ServiceImpl<DcsUserMapper, DcsUser> impl
         this.jwtProperties = jwtProperties;
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean createOrUpdate(final DcsUserQuery dcsUserQuery) {
+    public Boolean createOrUpdate(final DcsUserQuery dcsUserQuery) {
         DcsUser dcsUser = DcsUserQuery.createDO(dcsUserQuery);
         if (StringUtils.isEmpty(dcsUserQuery.getId())) {
             bindUserRole(dcsUserQuery.getId(), dcsUserQuery.getRoles());
@@ -77,7 +81,8 @@ public class DcsUserServiceImpl extends ServiceImpl<DcsUserMapper, DcsUser> impl
         return save(dcsUser);
     }
 
-    public int delete(final List<String> ids) {
+    @Override
+    public Integer delete(final List<String> ids) {
         int dashboardUserCount = 0;
         for (String id : ids) {
             DcsUser dcsUser = getById(id);
@@ -93,6 +98,7 @@ public class DcsUserServiceImpl extends ServiceImpl<DcsUserMapper, DcsUser> impl
         return dashboardUserCount;
     }
 
+    @Override
     public DcsUserVO findById(final String id) {
         DcsUser dcsUser = getById(id);
         if(dcsUser==null){
@@ -108,7 +114,7 @@ public class DcsUserServiceImpl extends ServiceImpl<DcsUserMapper, DcsUser> impl
         return DcsUserVO.buildDcsUserVO(dcsUser, roles, allRoles);
     }
 
-
+    @Override
     public DcsUserVO findByQuery(final String userName, final String password) {
         DcsUser dcsUser = getOne(new QueryWrapper<DcsUser>().eq("user_name",userName).eq("password",password));
         return DcsUserVO.buildDcsUserVO(dcsUser,null,null);
@@ -121,6 +127,7 @@ public class DcsUserServiceImpl extends ServiceImpl<DcsUserMapper, DcsUser> impl
         return DcsUserVO.buildDcsUserVO(dcsUser,null,null);
     }
 
+    @Override
     public CommonPager<DcsUser> listByPage(final DcsUserQuery userDTO) {
         PageParameter pagePara = userDTO.getPageParameter();
         IPage<DcsUser> page = new Page(pagePara.getCurrentPage(),pagePara.getPageSize());
@@ -129,18 +136,15 @@ public class DcsUserServiceImpl extends ServiceImpl<DcsUserMapper, DcsUser> impl
         return PageResultUtils.result(page);
     }
 
-//
-//    @Transactional(rollbackFor = Exception.class)
-//    public LoginDcsUserVO login(final String userName, final String password) {
-//        DcsUserVO dcsUserVO = null;
-//
-//        if (Objects.isNull(dcsUserVO)) {
-//            dcsUserVO = loginByDatabase(userName, password);
-//        }
-//        return LoginDcsUserVO.buildLoginDcsUserVO(dcsUserVO)
-//                .setToken(JwtUtils.generateToken(dcsUserVO.getUserName(), dcsUserVO.getPassword(),
-//                        jwtProperties.getExpiredSeconds()));
-//    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public LoginDcsUserVO login(final String userName, final String password) {
+        DcsUserVO dcsUserVO = loginByDatabase(userName, password);
+        LoginDcsUserVO loginDcsUserVO = LoginDcsUserVO.buildLoginDcsUserVO(dcsUserVO);
+        loginDcsUserVO.setToken(JwtUtils.generateToken(dcsUserVO.getUserName(),
+            dcsUserVO.getPassword(), jwtProperties.getExpiredSeconds()));
+        return loginDcsUserVO;
+    }
 
     private DcsUserVO loginByDatabase(final String userName, final String password) {
         String key = secretProperties.getKey();
@@ -156,6 +160,11 @@ public class DcsUserServiceImpl extends ServiceImpl<DcsUserMapper, DcsUser> impl
      * @param roleIds role ids.
      */
     private void bindUserRole(final String userId, final List<String> roleIds) {
-        roleIds.forEach(item -> userRoleMapper.insert(new UserRole(userId, item)));
+
+        roleIds.forEach(item -> {
+            UserRole userRole = new UserRole(userId, item);
+            userRole.setId(UUIDUtils.getInstance().generateShortUuid());
+            userRoleMapper.insert(userRole);
+        });
     }
 }

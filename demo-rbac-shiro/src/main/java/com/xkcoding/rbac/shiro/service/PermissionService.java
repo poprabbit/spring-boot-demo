@@ -2,6 +2,7 @@ package com.xkcoding.rbac.shiro.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xkcoding.rbac.shiro.model.entity.Permission;
+import com.xkcoding.rbac.shiro.model.vo.PermissionMenuVO;
 
 import java.util.Set;
 
@@ -15,4 +16,6 @@ import java.util.Set;
  */
 public interface PermissionService extends IService<Permission> {
     Set<String> getAuthPermByUserName(final String userName);
+
+    PermissionMenuVO getPermissionMenu(String token);
 }

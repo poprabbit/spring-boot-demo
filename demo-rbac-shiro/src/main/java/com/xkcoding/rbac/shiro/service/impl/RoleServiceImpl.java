@@ -47,9 +47,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Autowired
     private ResourceService resourceService;
 
-
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean createOrUpdate(final RoleQuery roleDTO) {
+    public Boolean createOrUpdate(final RoleQuery roleDTO) {
         Role roleDO = RoleQuery.createDO(roleDTO);
         if (StringUtils.isEmpty(roleDTO.getId())) {
             return save(roleDO);
@@ -59,13 +59,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         }
     }
 
-
-    public boolean delete(final List<String> ids) {
+    @Override
+    public Boolean delete(final List<String> ids) {
         permissionMapper.delete(new QueryWrapper<Permission>().in("object_id",ids));
         return removeByIds(ids);
     }
 
-
+    @Override
     public RoleEditVO findById(final String id) {
         RoleVO sysRole = RoleVO.buildRoleVO(getById(id));
         return Optional.ofNullable(sysRole).map(item -> new RoleEditVO(getPermissionIdsByRoleId(item.getId()), item,
@@ -77,7 +77,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         return RoleVO.buildRoleVO(getOne(new QueryWrapper<Role>().eq("role_name",roleName)));
     }
 
-
+    @Override
     public CommonPager<Role> listByPage(final RoleQuery roleQuery) {
         PageParameter pagePara = roleQuery.getPageParameter();
         IPage<Role> page = new Page(pagePara.getCurrentPage(),pagePara.getPageSize());
@@ -85,10 +85,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         page = page(page, new QueryWrapper<Role>().ne("role_name","super")
             .eq(!StringUtils.isEmpty(roleName),"role_name",roleName));
         return PageResultUtils.result(page);
-
     }
 
-
+    @Override
     public List<RoleVO> selectAll() {
         return list().stream().map(RoleVO::buildRoleVO).collect(Collectors.toList());
     }
@@ -113,7 +112,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return {@linkplain List}
      */
     private List<String> getPermissionIdsByRoleId(final String roleId) {
-        return permissionMapper.selectList(new QueryWrapper<Permission>().eq("role_id",roleId))
+        return permissionMapper.selectList(new QueryWrapper<Permission>().eq("object_id",roleId))
             .stream().map(Permission::getResourceId).collect(Collectors.toList());
     }
 

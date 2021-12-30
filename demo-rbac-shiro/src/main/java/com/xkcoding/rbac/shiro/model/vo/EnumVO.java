@@ -15,55 +15,37 @@
  * limitations under the License.
  */
 
-package com.xkcoding.rbac.shiro.config.prop;
+package com.xkcoding.rbac.shiro.model.vo;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
- * Aes Secret configuration.
+ * this is enum view to web front.
  */
-@Component
-@ConfigurationProperties(prefix = "dcs.aes.secret")
-public class SecretProperties {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EnumVO implements Serializable {
 
-    private String key;
-
-    private String iv;
-
-    /**
-     * Gets the value of key.
-     *
-     * @return the value of key
-     */
-    public String getKey() {
-        return key;
-    }
+    private static final long serialVersionUID = 213412846786447233L;
 
     /**
-     * Sets the key.
-     *
-     * @param key key
+     * enum code.
      */
-    public void setKey(final String key) {
-        this.key = key;
-    }
+    private Object code;
 
     /**
-     * Gets the value of iv.
-     *
-     * @return the value of iv
+     * enum name.
      */
-    public String getIv() {
-        return iv;
-    }
+    private String name;
 
     /**
-     * Sets the iv.
-     *
-     * @param iv iv
+     * whether support.
      */
-    public void setIv(final String iv) {
-        this.iv = iv;
-    }
+    private Boolean support;
+
 }

@@ -22,6 +22,7 @@ import com.xkcoding.rbac.shiro.model.entity.DcsUser;
 import com.xkcoding.rbac.shiro.model.page.PageParameter;
 import com.xkcoding.rbac.shiro.util.UUIDUtils;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
@@ -38,6 +39,7 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DcsUserQuery implements Serializable {
 
     private static final long serialVersionUID = -7005615329360835626L;

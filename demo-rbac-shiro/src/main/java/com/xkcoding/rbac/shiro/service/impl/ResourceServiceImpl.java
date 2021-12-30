@@ -46,8 +46,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     }
 
 
+
     @Transactional(rollbackFor = Exception.class)
-    public boolean createOrUpdate(final Resource resource) {
+    @Override
+    public Boolean createOrUpdate(final Resource resource) {
         if (StringUtils.isEmpty(resource.getId())) {
             return insertResource(resource);
         } else {
@@ -56,8 +58,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     }
 
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean delete(final List<String> ids) {
+    public Boolean delete(final List<String> ids) {
         Set<String> deleteResourceIds = new HashSet<>(ids);
         List<Resource> allResources = list();
         getDeleteResourceIds(deleteResourceIds, ids, allResources);
@@ -66,6 +69,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     }
 
 
+    @Override
     public Resource findById(final String id) {
         return getById(id);
     }
@@ -77,6 +81,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         return listByMap(columnMap).iterator().next();
     }
 
+    @Override
     public CommonPager<Resource> listByPage(final ResourceQuery resourceQuery) {
         PageParameter pagePara = resourceQuery.getPageParameter();
         IPage<Resource> page = new Page(pagePara.getCurrentPage(),pagePara.getPageSize());
@@ -87,6 +92,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     }
 
 
+    @Override
     public List<MenuInfo> getMenuTree() {
         List<Resource> resourceVOList = list();
         if (CollectionUtil.isNotEmpty(resourceVOList)) {
@@ -98,6 +104,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     }
 
 
+    @Override
     public List<Resource> findByParentId(final String id) {
         return list(new QueryWrapper<Resource>(Resource.builder().parentId(id).build())).stream()
             .filter(item -> item.getResourceType().equals(AdminResourceEnum.THREE_MENU.getCode()))

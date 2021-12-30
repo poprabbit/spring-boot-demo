@@ -15,40 +15,23 @@
  * limitations under the License.
  */
 
-package com.xkcoding.rbac.shiro.config.prop;
+package com.xkcoding.rbac.shiro.service;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+
+import com.xkcoding.rbac.shiro.model.vo.EnumVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * Shiro properties.
+ * this is enum service.
  */
-@Component("shiroProperties")
-@ConfigurationProperties(prefix = "dcs.shiro")
-public class ShiroProperties {
+public interface EnumService {
 
     /**
-     * shiro's white list.
-     */
-    private List<String> whiteList;
-
-    /**
-     * Gets the value of whiteList.
+     * find list of enum.
      *
-     * @return the value of whiteList
+     * @return {@linkplain Map}
      */
-    public List<String> getWhiteList() {
-        return whiteList;
-    }
-
-    /**
-     * Sets the whiteList.
-     *
-     * @param whiteList whiteList
-     */
-    public void setWhiteList(final List<String> whiteList) {
-        this.whiteList = whiteList;
-    }
+    Map<String, List<EnumVO>> list();
 }

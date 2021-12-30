@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
  * Jwt Properties.
  */
 @Component
-@ConfigurationProperties(prefix = "shenyu.jwt")
+@ConfigurationProperties(prefix = "dcs.jwt")
 public class JwtProperties {
 
     private Long expiredSeconds = 24 * 60 * 60 * 1000L;
