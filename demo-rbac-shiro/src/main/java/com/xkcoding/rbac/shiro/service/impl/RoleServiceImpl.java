@@ -1,6 +1,5 @@
 package com.xkcoding.rbac.shiro.service.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,11 +23,11 @@ import com.xkcoding.rbac.shiro.util.UUIDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 /**
  * <p>
@@ -51,7 +50,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Transactional(rollbackFor = Exception.class)
     public Boolean createOrUpdate(final RoleQuery roleDTO) {
         Role roleDO = RoleQuery.createDO(roleDTO);
-        if (StringUtils.isEmpty(roleDTO.getId())) {
+        if (isEmpty(roleDTO.getId())) {
             return save(roleDO);
         } else {
             manageRolePermission(roleDTO.getId(), roleDTO.getCurrentPermissionIds());
@@ -83,7 +82,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         IPage<Role> page = new Page(pagePara.getCurrentPage(),pagePara.getPageSize());
         String roleName = roleQuery.getRoleName();
         page = page(page, new QueryWrapper<Role>().ne("role_name","super")
-            .eq(!StringUtils.isEmpty(roleName),"role_name",roleName));
+            .eq(!isEmpty(roleName),"role_name",roleName));
         return PageResultUtils.result(page);
     }
 
@@ -127,12 +126,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         for (Resource resourceVO : metaList) {
             String parentId = resourceVO.getParentId();
             ResourceInfo resourceInfoItem = ResourceInfo.buildResourceInfo(resourceVO);
-            if (ObjectUtils.isEmpty(resourceInfo) && StringUtils.isEmpty(parentId)) {
+            if (isEmpty(resourceInfo) && isEmpty(parentId)) {
                 treeList.add(resourceInfoItem);
                 if (resourceInfoItem.getIsLeaf().equals(Boolean.FALSE)) {
                     getTreeModelList(treeList, metaList, resourceInfoItem);
                 }
-            } else if (!ObjectUtils.isEmpty(resourceInfo) && !StringUtils.isEmpty(parentId) && parentId.equals(resourceInfo.getId())) {
+            } else if (!isEmpty(resourceInfo) && !isEmpty(parentId) && parentId.equals(resourceInfo.getId())) {
                 resourceInfo.getChildren().add(resourceInfoItem);
                 if (resourceInfoItem.getIsLeaf().equals(Boolean.FALSE)) {
                     getTreeModelList(treeList, metaList, resourceInfoItem);
@@ -150,10 +149,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return {@linkplain List}
      */
     private List<String> getListDiff(final List<String> preList, final List<String> lastList) {
-        if (CollectionUtil.isEmpty(lastList)) {
+        if (isEmpty(lastList)) {
             return null;
         }
-        if (CollectionUtil.isEmpty(preList)) {
+        if (isEmpty(preList)) {
             return lastList;
         }
         Map<String, Integer> map = preList.stream().distinct()
@@ -192,7 +191,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         List<String> lastPermissionList = permissionMapper.selectList(new QueryWrapper<Permission>().eq("object_id",roleId))
             .stream().map(Permission::getResourceId).collect(Collectors.toList());
         List<String> addPermission = getListDiff(lastPermissionList, currentPermissionList);
-        if (CollectionUtil.isNotEmpty(addPermission)) {
+        if (!isEmpty(addPermission)) {
             batchSavePermission(addPermission.stream().map(node -> {
                 Permission permission = new Permission(roleId, node);
                 permission.setId(UUIDUtils.getInstance().generateShortUuid());
@@ -200,7 +199,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             }).collect(Collectors.toList()));
         }
         List<String> deletePermission = getListDiff(currentPermissionList, lastPermissionList);
-        if (CollectionUtil.isNotEmpty(deletePermission)) {
+        if (!isEmpty(deletePermission)) {
             deletePermission.forEach(node -> deleteByObjectIdAndResourceId(new Permission(roleId, node)));
         }
     }

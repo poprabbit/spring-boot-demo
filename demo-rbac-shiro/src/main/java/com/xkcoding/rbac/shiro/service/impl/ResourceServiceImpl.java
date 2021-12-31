@@ -1,6 +1,5 @@
 package com.xkcoding.rbac.shiro.service.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -21,11 +20,13 @@ import com.xkcoding.rbac.shiro.util.UUIDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 /**
  * <p>
@@ -50,7 +51,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean createOrUpdate(final Resource resource) {
-        if (StringUtils.isEmpty(resource.getId())) {
+        if (isEmpty(resource.getId())) {
             return insertResource(resource);
         } else {
             return updateById(resource);
@@ -87,7 +88,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         IPage<Resource> page = new Page(pagePara.getCurrentPage(),pagePara.getPageSize());
         String title = resourceQuery.getTitle();
         page = page(page, new QueryWrapper<Resource>().eq("status",1)
-            .eq(!StringUtils.isEmpty(title),"title",title));
+            .eq(!isEmpty(title),"title",title));
         return PageResultUtils.result(page);
     }
 
@@ -95,7 +96,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Override
     public List<MenuInfo> getMenuTree() {
         List<Resource> resourceVOList = list();
-        if (CollectionUtil.isNotEmpty(resourceVOList)) {
+        if (!isEmpty(resourceVOList)) {
             List<MenuInfo> menuInfoList = new ArrayList<>();
             getMenuInfo(menuInfoList, resourceVOList, null);
             return menuInfoList;
@@ -117,15 +118,15 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         for (Resource resourceVO : metaList) {
             String parentId = resourceVO.getParentId();
             MenuInfo tempMenuInfo = MenuInfo.buildMenuInfo(resourceVO);
-            if (ObjectUtils.isEmpty(tempMenuInfo)) {
+            if (isNull(tempMenuInfo)) {
                 continue;
             }
-            if (ObjectUtils.isEmpty(menuInfo) && StringUtils.isEmpty(parentId)) {
+            if (isNull(menuInfo) && isEmpty(parentId)) {
                 menuInfoList.add(tempMenuInfo);
                 if (Objects.equals(resourceVO.getIsLeaf(), Boolean.FALSE)) {
                     getMenuInfo(menuInfoList, metaList, tempMenuInfo);
                 }
-            } else if (!ObjectUtils.isEmpty(menuInfo) && !StringUtils.isEmpty(parentId) && parentId.equals(menuInfo.getId())) {
+            } else if (nonNull(menuInfo) && !isEmpty(parentId) && parentId.equals(menuInfo.getId())) {
                 menuInfo.getChildren().add(tempMenuInfo);
                 if (Objects.equals(resourceVO.getIsLeaf(), Boolean.FALSE)) {
                     getMenuInfo(menuInfoList, metaList, tempMenuInfo);
@@ -146,7 +147,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
                     deleteResourceIds.add(resource.getId());
                 }
             });
-            if (CollectionUtil.isNotEmpty(matchResourceIds)) {
+            if (!isEmpty(matchResourceIds)) {
                 getDeleteResourceIds(deleteResourceIds, matchResourceIds, allResources);
             }
         });

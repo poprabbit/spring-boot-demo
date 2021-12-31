@@ -1,6 +1,5 @@
 package com.xkcoding.rbac.shiro.service.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xkcoding.rbac.shiro.common.ResourceTypeConstants;
@@ -17,14 +16,17 @@ import com.xkcoding.rbac.shiro.model.entity.UserRole;
 import com.xkcoding.rbac.shiro.model.vo.PermissionMenuVO;
 import com.xkcoding.rbac.shiro.model.vo.PermissionMenuVO.AuthPerm;
 import com.xkcoding.rbac.shiro.model.vo.PermissionMenuVO.MenuInfo;
+import com.xkcoding.rbac.shiro.service.DcsUserService;
 import com.xkcoding.rbac.shiro.service.PermissionService;
 import com.xkcoding.rbac.shiro.service.ResourceService;
+import com.xkcoding.rbac.shiro.service.UserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 /**
  * <p>
@@ -41,7 +43,13 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     private DcsUserMapper dcsUserMapper;
 
     @Autowired
+    private DcsUserService dcsUserService;
+
+    @Autowired
     private UserRoleMapper userRoleMapper;
+
+    @Autowired
+    private UserRoleService userRoleService;
 
     @Autowired
     private ResourceMapper resourceMapper;
@@ -52,9 +60,9 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     @Override
     public PermissionMenuVO getPermissionMenu(final String token) {
         UserInfo userInfo = JwtUtils.getUserInfo();
-        if (!ObjectUtils.isEmpty(userInfo)) {
+        if (Objects.nonNull(userInfo)) {
             List<Resource> resourceVOList = getResourceListByUserName(userInfo.getUserName());
-            if (CollectionUtil.isNotEmpty(resourceVOList)) {
+            if (!isEmpty(resourceVOList)) {
                 List<MenuInfo> menuInfoList = new ArrayList<>();
                 resourceService.getMenuInfo(menuInfoList, resourceVOList, null);
                 return new PermissionMenuVO(menuInfoList, getAuthPerm(resourceVOList), getAllAuthPerms());
@@ -67,7 +75,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     @Override
     public Set<String> getAuthPermByUserName(final String userName) {
         List<Resource> resourceVOList = getResourceListByUserName(userName);
-        if (CollectionUtil.isNotEmpty(resourceVOList)) {
+        if (!isEmpty(resourceVOList)) {
             return getAuthPerm(resourceVOList).stream().map(AuthPerm::getPerms).collect(Collectors.toSet());
         }
         return Collections.emptySet();
@@ -76,20 +84,24 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     private List<Resource> getResourceListByUserName(final String userName) {
         Map<String, Integer> resourceMap = new HashMap<>();
-        DcsUser dcsUser = dcsUserMapper.selectOne(new QueryWrapper<DcsUser>().eq("user_name",userName));
-        List<UserRole> userRoleDOList = userRoleMapper.selectList(new QueryWrapper<UserRole>().eq("user_id",dcsUser.getId()));
+        DcsUser dcsUser = dcsUserService.findByUserName(userName);
+        List<UserRole> userRoleDOList = userRoleService.findByUserId(dcsUser.getId());
         for (UserRole userRoleDO : userRoleDOList) {
-            list(new QueryWrapper<Permission>().eq("object_id",userRoleDO.getRoleId()))
-                .stream().map(Permission::getResourceId)
-                .collect(Collectors.toList())
+            findByObjectId(userRoleDO.getRoleId()).stream()
+                .map(Permission::getResourceId).collect(Collectors.toList())
                 .forEach(resource -> resourceMap.put(resource, 1));
         }
-        if (CollectionUtil.isNotEmpty(resourceMap)) {
+        if (!isEmpty(resourceMap)) {
             return resourceMap.keySet().stream()
-                .map(resource -> resourceMapper.selectById(resource))
-                .collect(Collectors.toList());
+                .map(resourceId -> resourceMapper.selectById(resourceId))
+                .filter(Objects::nonNull).collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<Permission> findByObjectId(String objectId){
+        return list(new QueryWrapper<Permission>().eq("object_id",objectId));
     }
 
 

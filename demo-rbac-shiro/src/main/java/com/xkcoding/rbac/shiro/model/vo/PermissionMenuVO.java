@@ -327,7 +327,7 @@ public class PermissionMenuVO implements Serializable {
         public static MenuInfo buildMenuInfo(final Resource resourceVO) {
             return Optional.ofNullable(resourceVO).map(item -> {
                 MenuInfo menuInfo = null;
-                if (!resourceVO.getResourceType().equals(ResourceTypeConstants.MENU_TYPE_2)) {
+                if (!item.getResourceType().equals(ResourceTypeConstants.MENU_TYPE_2)) {
                     menuInfo = MenuInfo.builder()
                             .id(item.getId())
                             .name(item.getName())

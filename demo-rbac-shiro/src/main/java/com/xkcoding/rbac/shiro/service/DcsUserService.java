@@ -18,7 +18,7 @@ import java.util.List;
  * @date Created in 2018-11-08 18:10
  */
 public interface DcsUserService extends IService<DcsUser> {
-    DcsUserVO findByUserName(final String userName);
+    DcsUser findByUserName(final String userName);
 
     CommonPager<DcsUser> listByPage(DcsUserQuery build);
 
@@ -28,7 +28,7 @@ public interface DcsUserService extends IService<DcsUser> {
 
     Integer delete(List<String> ids);
 
-    DcsUserVO findByQuery(final String userName, final String password);
+    DcsUserVO findByUsernameAndPassword(final String userName, final String password);
 
     LoginDcsUserVO login(String userName, String password);
 }

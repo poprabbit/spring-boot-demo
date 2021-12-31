@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xkcoding.rbac.shiro.model.entity.Resource;
 import com.xkcoding.rbac.shiro.model.page.CommonPager;
 import com.xkcoding.rbac.shiro.model.query.ResourceQuery;
-import com.xkcoding.rbac.shiro.model.vo.PermissionMenuVO;
+import com.xkcoding.rbac.shiro.model.vo.PermissionMenuVO.MenuInfo;
 
 import java.util.List;
 
@@ -18,9 +18,9 @@ import java.util.List;
  */
 public interface ResourceService extends IService<Resource> {
 
-    void getMenuInfo(final List<PermissionMenuVO.MenuInfo> menuInfoList, final List<Resource> metaList, final PermissionMenuVO.MenuInfo menuInfo);
+    void getMenuInfo(final List<MenuInfo> menuInfoList, final List<Resource> metaList, final MenuInfo menuInfo);
 
-    List<PermissionMenuVO.MenuInfo> getMenuTree();
+    List<MenuInfo> getMenuTree();
 
     List<Resource> findByParentId(String id);
 

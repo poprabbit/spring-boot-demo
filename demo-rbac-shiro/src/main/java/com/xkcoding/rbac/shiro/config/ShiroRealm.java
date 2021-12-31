@@ -21,7 +21,7 @@ package com.xkcoding.rbac.shiro.config;
 import com.xkcoding.rbac.shiro.config.bean.StatelessToken;
 import com.xkcoding.rbac.shiro.config.prop.JwtUtils;
 import com.xkcoding.rbac.shiro.model.custom.UserInfo;
-import com.xkcoding.rbac.shiro.model.vo.DcsUserVO;
+import com.xkcoding.rbac.shiro.model.entity.DcsUser;
 import com.xkcoding.rbac.shiro.service.DcsUserService;
 import com.xkcoding.rbac.shiro.service.PermissionService;
 import org.apache.shiro.authc.AuthenticationException;
@@ -83,18 +83,18 @@ public class ShiroRealm extends AuthorizingRealm {
             throw new AuthenticationException("userName is null");
         }
 
-        DcsUserVO dashboardUserVO = dcsUserService.findByUserName(userName);
-        if (dashboardUserVO == null) {
+        DcsUser dcsUser = dcsUserService.findByUserName(userName);
+        if (dcsUser == null) {
             throw new AuthenticationException(String.format("userName(%s) can not be found.", userName));
         }
 
-        if (!JwtUtils.verifyToken(token, dashboardUserVO.getPassword())) {
+        if (!JwtUtils.verifyToken(token, dcsUser.getPassword())) {
             throw new AuthenticationException("token is error.");
         }
 
         return new SimpleAuthenticationInfo(UserInfo.builder()
                 .userName(userName)
-                .userId(dashboardUserVO.getId())
+                .userId(dcsUser.getId())
                 .build(), token, this.getName());
     }
 }
