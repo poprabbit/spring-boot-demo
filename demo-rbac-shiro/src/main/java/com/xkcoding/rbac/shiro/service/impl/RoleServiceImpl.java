@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xkcoding.rbac.shiro.mapper.PermissionMapper;
 import com.xkcoding.rbac.shiro.mapper.RoleMapper;
 import com.xkcoding.rbac.shiro.model.entity.Permission;
 import com.xkcoding.rbac.shiro.model.entity.Resource;
@@ -17,6 +16,7 @@ import com.xkcoding.rbac.shiro.model.vo.RoleEditVO;
 import com.xkcoding.rbac.shiro.model.vo.RoleEditVO.PermissionInfo;
 import com.xkcoding.rbac.shiro.model.vo.RoleEditVO.ResourceInfo;
 import com.xkcoding.rbac.shiro.model.vo.RoleVO;
+import com.xkcoding.rbac.shiro.service.PermissionService;
 import com.xkcoding.rbac.shiro.service.ResourceService;
 import com.xkcoding.rbac.shiro.service.RoleService;
 import com.xkcoding.rbac.shiro.util.UUIDUtils;
@@ -24,7 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -41,7 +44,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
 
     @Autowired
-    private PermissionMapper permissionMapper;
+    private PermissionService permissionService;
 
     @Autowired
     private ResourceService resourceService;
@@ -60,7 +63,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public Boolean delete(final List<String> ids) {
-        permissionMapper.delete(new QueryWrapper<Permission>().in("object_id",ids));
+        permissionService.deleteByObjectIds(ids);
         return removeByIds(ids);
     }
 
@@ -111,8 +114,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return {@linkplain List}
      */
     private List<String> getPermissionIdsByRoleId(final String roleId) {
-        return permissionMapper.selectList(new QueryWrapper<Permission>().eq("object_id",roleId))
-            .stream().map(Permission::getResourceId).collect(Collectors.toList());
+        return permissionService.findByObjectId(roleId).stream()
+            .map(Permission::getResourceId).collect(Collectors.toList());
     }
 
     /**
@@ -166,19 +169,16 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @param permissionDOList {@linkplain List}
      */
     private void batchSavePermission(final List<Permission> permissionDOList) {
-        permissionDOList.forEach(permissionMapper::insert);
+        permissionDOList.forEach(permissionService::save);
     }
 
     /**
      * delete by object and resource id.
      *
-     * @param permissionQuery permission query
+     * @param query permission query
      */
-    private void deleteByObjectIdAndResourceId(final Permission permissionQuery) {
-        Map<String,String> paramMap = new HashMap<>();
-        paramMap.put("object_id", permissionQuery.getObjectId());
-        paramMap.put("resource_id", permissionQuery.getResourceId());
-        permissionMapper.delete(new QueryWrapper<Permission>().allEq(paramMap));
+    private void deleteByObjectIdAndResourceId(final Permission query) {
+        permissionService.deleteByObjectIdAndResourceId(query.getObjectId(), query.getResourceId());
     }
 
     /**
@@ -188,7 +188,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @param currentPermissionList {@linkplain List} current role permission ids
      */
     private void manageRolePermission(final String roleId, final List<String> currentPermissionList) {
-        List<String> lastPermissionList = permissionMapper.selectList(new QueryWrapper<Permission>().eq("object_id",roleId))
+        List<String> lastPermissionList = permissionService.findByObjectId(roleId)
             .stream().map(Permission::getResourceId).collect(Collectors.toList());
         List<String> addPermission = getListDiff(lastPermissionList, currentPermissionList);
         if (!isEmpty(addPermission)) {

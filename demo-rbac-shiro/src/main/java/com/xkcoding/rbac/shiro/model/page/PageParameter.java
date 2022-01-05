@@ -17,12 +17,18 @@
 
 package com.xkcoding.rbac.shiro.model.page;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * PageParameter.
  */
+@Data
+@ToString
+@EqualsAndHashCode
 public class PageParameter implements Serializable {
 
     private static final long serialVersionUID = -8324693985921606090L;
@@ -74,167 +80,5 @@ public class PageParameter implements Serializable {
         this.totalPage = (long) Math.ceil((double) totalCount / (double) pageSize);
         this.prePage = currentPage <= 1 ? 1 : currentPage - 1;
         this.nextPage = currentPage >= this.totalPage ? this.totalPage : currentPage + 1;
-    }
-
-    /**
-     * Gets the value of currentPage.
-     *
-     * @return the value of currentPage
-     */
-    public long getCurrentPage() {
-        return currentPage;
-    }
-
-    /**
-     * Sets the currentPage.
-     *
-     * @param currentPage currentPage
-     */
-    public void setCurrentPage(final long currentPage) {
-        this.currentPage = currentPage;
-    }
-
-    /**
-     * Gets the value of prePage.
-     *
-     * @return the value of prePage
-     */
-    public long getPrePage() {
-        return prePage;
-    }
-
-    /**
-     * Sets the prePage.
-     *
-     * @param prePage prePage
-     */
-    public void setPrePage(final long prePage) {
-        this.prePage = prePage;
-    }
-
-    /**
-     * Gets the value of nextPage.
-     *
-     * @return the value of nextPage
-     */
-    public long getNextPage() {
-        return nextPage;
-    }
-
-    /**
-     * Sets the nextPage.
-     *
-     * @param nextPage nextPage
-     */
-    public void setNextPage(final long nextPage) {
-        this.nextPage = nextPage;
-    }
-
-    /**
-     * Gets the value of pageSize.
-     *
-     * @return the value of pageSize
-     */
-    public long getPageSize() {
-        return pageSize;
-    }
-
-    /**
-     * Sets the pageSize.
-     *
-     * @param pageSize pageSize
-     */
-    public void setPageSize(final long pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    /**
-     * Gets the value of offset.
-     *
-     * @return the value of offset
-     */
-    public long getOffset() {
-        return offset;
-    }
-
-    /**
-     * Sets the offset.
-     *
-     * @param offset offset
-     */
-    public void setOffset(final long offset) {
-        this.offset = offset;
-    }
-
-    /**
-     * Gets the value of totalPage.
-     *
-     * @return the value of totalPage
-     */
-    public long getTotalPage() {
-        return totalPage;
-    }
-
-    /**
-     * Sets the totalPage.
-     *
-     * @param totalPage totalPage
-     */
-    public void setTotalPage(final long totalPage) {
-        this.totalPage = totalPage;
-    }
-
-    /**
-     * Gets the value of totalCount.
-     *
-     * @return the value of totalCount
-     */
-    public long getTotalCount() {
-        return totalCount;
-    }
-
-    /**
-     * Sets the totalCount.
-     *
-     * @param totalCount totalCount
-     */
-    public void setTotalCount(final long totalCount) {
-        this.totalCount = totalCount;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PageParameter)) {
-            return false;
-        }
-        PageParameter that = (PageParameter) o;
-        return currentPage == that.currentPage
-                && prePage == that.prePage
-                && nextPage == that.nextPage
-                && pageSize == that.pageSize
-                && offset == that.offset
-                && totalPage == that.totalPage
-                && totalCount == that.totalCount;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(currentPage, prePage, nextPage, pageSize, offset, totalPage, totalCount);
-    }
-
-    @Override
-    public String toString() {
-        return "PageParameter{"
-                + "currentPage=" + currentPage
-                + ", prePage=" + prePage
-                + ", nextPage=" + nextPage
-                + ", pageSize=" + pageSize
-                + ", offset=" + offset
-                + ", totalPage=" + totalPage
-                + ", totalCount=" + totalCount
-                + '}';
     }
 }

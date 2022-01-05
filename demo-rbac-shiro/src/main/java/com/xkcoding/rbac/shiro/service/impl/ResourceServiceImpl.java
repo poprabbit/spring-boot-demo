@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xkcoding.rbac.shiro.common.AdminConstants;
 import com.xkcoding.rbac.shiro.enums.AdminResourceEnum;
-import com.xkcoding.rbac.shiro.mapper.PermissionMapper;
 import com.xkcoding.rbac.shiro.mapper.ResourceMapper;
 import com.xkcoding.rbac.shiro.model.entity.Permission;
 import com.xkcoding.rbac.shiro.model.entity.Resource;
@@ -15,6 +14,7 @@ import com.xkcoding.rbac.shiro.model.page.PageParameter;
 import com.xkcoding.rbac.shiro.model.page.PageResultUtils;
 import com.xkcoding.rbac.shiro.model.query.ResourceQuery;
 import com.xkcoding.rbac.shiro.model.vo.PermissionMenuVO.MenuInfo;
+import com.xkcoding.rbac.shiro.service.PermissionService;
 import com.xkcoding.rbac.shiro.service.ResourceService;
 import com.xkcoding.rbac.shiro.util.UUIDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +40,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> implements ResourceService {
 
     @Autowired
-    private PermissionMapper permissionMapper;
-
-    public void createResource(final Resource resource) {
-        insertResource(resource);
-    }
-
-
+    private PermissionService permissionService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -65,7 +59,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         Set<String> deleteResourceIds = new HashSet<>(ids);
         List<Resource> allResources = list();
         getDeleteResourceIds(deleteResourceIds, ids, allResources);
-        permissionMapper.delete(new QueryWrapper<Permission>().in("resource_id",deleteResourceIds));
+        permissionService.deleteByResourceIds(deleteResourceIds);
         return removeByIds(deleteResourceIds);
     }
 
@@ -157,7 +151,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     private boolean insertResource(final Resource resource) {
         Permission permission = new Permission(AdminConstants.ROLE_SUPER_ID,resource.getId());
         permission.setId(UUIDUtils.getInstance().generateShortUuid());
-        permissionMapper.insert(permission);
+        permissionService.save(permission);
         return save(resource);
     }
 }

@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xkcoding.rbac.shiro.common.ResourceTypeConstants;
 import com.xkcoding.rbac.shiro.config.prop.JwtUtils;
-import com.xkcoding.rbac.shiro.mapper.DcsUserMapper;
 import com.xkcoding.rbac.shiro.mapper.PermissionMapper;
-import com.xkcoding.rbac.shiro.mapper.ResourceMapper;
-import com.xkcoding.rbac.shiro.mapper.UserRoleMapper;
 import com.xkcoding.rbac.shiro.model.custom.UserInfo;
 import com.xkcoding.rbac.shiro.model.entity.DcsUser;
 import com.xkcoding.rbac.shiro.model.entity.Permission;
@@ -40,19 +37,10 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements PermissionService {
 
     @Autowired
-    private DcsUserMapper dcsUserMapper;
-
-    @Autowired
     private DcsUserService dcsUserService;
 
     @Autowired
-    private UserRoleMapper userRoleMapper;
-
-    @Autowired
     private UserRoleService userRoleService;
-
-    @Autowired
-    private ResourceMapper resourceMapper;
 
     @Autowired
     private ResourceService resourceService;
@@ -71,7 +59,6 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         return null;
     }
 
-
     @Override
     public Set<String> getAuthPermByUserName(final String userName) {
         List<Resource> resourceVOList = getResourceListByUserName(userName);
@@ -81,6 +68,25 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         return Collections.emptySet();
     }
 
+    @Override
+    public List<Permission> findByObjectId(String objectId){
+        return list(new QueryWrapper<Permission>().eq("object_id",objectId));
+    }
+
+    @Override
+    public void deleteByResourceIds(Collection<String> resourceIds){
+        remove(new QueryWrapper<Permission>().in("resource_id",resourceIds));
+    }
+
+    @Override
+    public void deleteByObjectIds(Collection<String> objectIds){
+        remove(new QueryWrapper<Permission>().in("object_id",objectIds));
+    }
+
+    @Override
+    public void deleteByObjectIdAndResourceId(String objectId, String resourceId){
+        remove(new QueryWrapper<Permission>().eq("object_id",objectId).eq("resource_id",resourceId));
+    }
 
     private List<Resource> getResourceListByUserName(final String userName) {
         Map<String, Integer> resourceMap = new HashMap<>();
@@ -93,17 +99,11 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         }
         if (!isEmpty(resourceMap)) {
             return resourceMap.keySet().stream()
-                .map(resourceId -> resourceMapper.selectById(resourceId))
+                .map(resourceService::findById)
                 .filter(Objects::nonNull).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
-
-    @Override
-    public List<Permission> findByObjectId(String objectId){
-        return list(new QueryWrapper<Permission>().eq("object_id",objectId));
-    }
-
 
     private List<AuthPerm> getAuthPerm(final List<Resource> resourceVOList) {
         return resourceVOList.stream()

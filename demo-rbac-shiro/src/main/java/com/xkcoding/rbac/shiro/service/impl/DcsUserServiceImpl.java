@@ -138,6 +138,13 @@ public class DcsUserServiceImpl extends ServiceImpl<DcsUserMapper, DcsUser> impl
         return loginDcsUserVO;
     }
 
+    /**
+     * 数据库登录
+     *
+     * @param userName userName
+     * @param password password
+     * @return
+     */
     private DcsUserVO loginByDatabase(final String userName, final String password) {
         String key = secretProperties.getKey();
         String iv = secretProperties.getIv();
